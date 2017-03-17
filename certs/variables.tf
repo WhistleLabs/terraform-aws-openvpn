@@ -86,3 +86,9 @@ variable "ssh_whitelist" {
   description = "Limit SSH access to the designated list of CIDRs"
   default     = "0.0.0.0/0"
 }
+
+variable "icmp_whitelist" {
+  type        = "string"
+  description = "Limit ICMP response to the designated list of CIDRs"
+  default     = "0.0.0.0/0"
+}
