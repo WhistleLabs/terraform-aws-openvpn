@@ -179,7 +179,7 @@ resource "aws_security_group_rule" "cluster_allow_icmp_in" {
   from_port         = 0
   to_port           = 0
   protocol          = "icmp"
-  cidr_blocks       = ["${split(",",var.ssh_whitelist)}"]
+  cidr_blocks       = ["${split(",",var.icmp_whitelist)}"]
   security_group_id = "${module.cluster.sg_id}"
 }
 
