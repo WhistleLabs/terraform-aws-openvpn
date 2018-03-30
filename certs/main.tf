@@ -196,7 +196,7 @@ resource "aws_eip" "openvpn_eip" {
     application = "${var.stack_item_fullname}"
     managed_by  = "terraform"
     Name        = "${var.stack_item_label}"
-  } 
+  }
 }
 
 ## Creates instance user data

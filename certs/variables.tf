@@ -45,8 +45,8 @@ variable "ami_region_lookup" {
   type = "map"
 
   default = {
-    us-east-1      = "ami-44e8913e"
-    us-east-2      = "ami-d1c9e1b4"
+    us-east-1 = "ami-44e8913e"
+    us-east-2 = "ami-d1c9e1b4"
   }
 }
 
@@ -108,4 +108,3 @@ variable "vpn_whitelist" {
   description = "Limit VPN access to the designated list of CIDRs"
   default     = "0.0.0.0/0"
 }
-
