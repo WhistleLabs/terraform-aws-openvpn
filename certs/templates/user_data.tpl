@@ -10,10 +10,12 @@ runcmd:
   - echo "push \"route ${cidrhost(element(split(",",route_cidrs),2), 0)}  ${cidrnetmask(element(split(",",route_cidrs),2))}\"" >> /etc/openvpn/server.conf
   - echo "push \"route ${cidrhost(element(split(",",route_cidrs),3), 0)}  ${cidrnetmask(element(split(",",route_cidrs),3))}\"" >> /etc/openvpn/server.conf
   - echo "push \"route ${cidrhost(element(split(",",route_cidrs),4), 0)}  ${cidrnetmask(element(split(",",route_cidrs),4))}\"" >> /etc/openvpn/server.conf
+  - for route in `echo ${additional_routes} | tr ',' ' '`; do echo "push \"route $${route}  255.255.255.255\"" >> /etc/openvpn/server.conf;done
   - sed -i 's/\(ExecStartPost=.*chmod.*$\)/ExecStartPost=\/bin\/chown -R nobody:nogroup \/etc\/openvpn\n\1\n/g' /etc/systemd/system/get-openvpn-certs.service
   - systemctl daemon-reload
   - systemctl start get-openvpn-certs
   - systemctl restart openvpn@server
   - systemctl restart iptables
+  - if [ ${assign_eip} = 'true' ]; then for eip in `aws ec2 describe-tags --region=${region} --filters  "Name=resource-type,Values=elastic-ip" --filters  "Name=value,Values=${stack_item_label}" | jq -r '.Tags[].ResourceId'`; do if [ `aws ec2 describe-addresses --allocation-id $${eip} --region=${region} | jq -r '.Addresses[].InstanceId'` = 'null' ]; then echo "$${eip} is available, assigning it to current instance";aws ec2 associate-address --instance-id "$${INSTANCE_ID}" --allocation-id $${eip} --region=${region};else echo "$${eip} is taken";fi; done;fi
 
 output : { all : '| tee -a /var/log/cloud-init-output.log' }
