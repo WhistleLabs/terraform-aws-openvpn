@@ -7,6 +7,11 @@
 - Fix the 4 subnet fixed mapping
 - Fill in some examples
 
+## 1.0.0
+- **BREAKING CHANGES**: No longer compatible with versions pre terraform 0.10.x, due to the provider split
+
+
+
 ## 0.0.10
 
 #### IMPROVEMENTS:

@@ -69,6 +69,7 @@ resource "aws_iam_role_policy" "tags" {
       "Effect": "Allow",
       "Action": [
           "ec2:CreateTags",
+          "ec2:DescribeTags",
           "ec2:AssociateAddress",
           "ec2:DescribeAddresses",
           "ec2:DescribeInstances"
@@ -83,7 +84,7 @@ EOF
 ## Creates IAM instance profile
 resource "aws_iam_instance_profile" "profile" {
   name  = "${var.stack_item_label}-${var.region}"
-  roles = ["${aws_iam_role.role.name}"]
+  role = "${aws_iam_role.role.name}"
 }
 
 ## Create elastic load balancer security group and rules
@@ -187,21 +188,38 @@ resource "aws_security_group_rule" "cluster_allow_icmp_in" {
   security_group_id = "${module.cluster.sg_id}"
 }
 
+resource "aws_eip" "openvpn_eip" {
+  count = "${var.assign_eip == "true" ? 1 : 0}"
+  vpc   = true
+
+  tags {
+    application = "${var.stack_item_fullname}"
+    managed_by  = "terraform"
+    Name        = "${var.stack_item_label}"
+  }
+}
+
+
 ## Creates instance user data
 data "template_file" "user_data" {
   template = "${file("${path.module}/templates/user_data.tpl")}"
 
   vars {
-    hostname         = "${var.stack_item_label}"
-    s3_bucket        = "${var.s3_bucket}"
-    s3_bucket_prefix = "${var.s3_bucket_prefix}"
-    route_cidrs      = "${var.route_cidrs}"
+    additional_routes = "${var.additional_routes}"
+    assign_eip        = "${var.assign_eip}"
+    hostname          = "${var.stack_item_label}"
+    region            = "${var.region}"
+    route_cidrs       = "${var.route_cidrs}"
+    s3_bucket         = "${var.s3_bucket}"
+    s3_bucket_prefix  = "${var.s3_bucket_prefix}"
+    stack_item_label  = "${var.stack_item_label}"
+    vpc_dns_ip        = "${var.vpc_dns_ip}"
   }
 }
 
 ## Creates auto scaling cluster
 module "cluster" {
-  source = "github.com/unifio/terraform-aws-asg?ref=v0.3.0//group"
+  source = "github.com/unifio/terraform-aws-asg?ref=v0.3.1//group"
 
   # Resource tags
   stack_item_label    = "${var.stack_item_label}"
@@ -213,16 +231,18 @@ module "cluster" {
 
   # LC parameters
   ami                           = "${coalesce(var.ami_custom, lookup(var.ami_region_lookup, var.region))}"
-  instance_based_naming_enabled = "${var.instance_based_naming_enabled}"
+  enable_monitoring             = "true"
   instance_type                 = "${var.instance_type}"
   instance_profile              = "${aws_iam_instance_profile.profile.id}"
+  /*instance_based_naming_enabled = "${var.instance_based_naming_enabled}"*/
   user_data                     = "${data.template_file.user_data.rendered}"
   key_name                      = "${var.key_name}"
+  ebs_optimized                 = "false"
 
   # ASG parameters
   max_size         = 2
   min_size         = 1
   hc_grace_period  = 300
   min_elb_capacity = 1
-  load_balancers   = ["${aws_elb.elb.id}"]
+  load_balancers   = ["${split(",",aws_elb.elb.id)}"]
 }

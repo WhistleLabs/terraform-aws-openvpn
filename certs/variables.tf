@@ -27,6 +27,12 @@ variable "subnets" {
   description = "List of VPC subnets to associate with the cluster."
 }
 
+variable "additional_routes" {
+  type        = "string"
+  description = "Additional routes to add to Openvpn Config"
+  default     = ""
+}
+
 ## OpenVPN parameters
 variable "ami_custom" {
   type        = "string"
@@ -43,6 +49,18 @@ variable "ami_region_lookup" {
     ap-northeast-1 = "ami-4803ec29"
     us-west-2      = "ami-4308a323"
   }
+}
+
+variable "assign_eip" {
+  type        = "string"
+  description = "Boolean to determine if Elastic IP should be assigned to host"
+  default     = "false"
+}
+
+variable "eip_tag" {
+  type        = "string"
+  description = "Tag used to lookup Elastic IP to assign"
+  default     = ""
 }
 
 variable "instance_based_naming_enabled" {
@@ -81,14 +99,20 @@ variable "s3_bucket_prefix" {
   default     = ""
 }
 
+variable "ssh_whitelist" {
+  type        = "string"
+  description = "Limit SSH access to the designated list of CIDRs"
+  default     = "0.0.0.0/0"
+}
+
+variable "vpc_dns_ip" {
+  type        = "string"
+  description = "DNS IP address for the VPC."
+}
+
 variable "vpn_whitelist" {
   type        = "string"
   description = "Limit VPN access to the designated list of CIDRs"
   default     = "0.0.0.0/0"
 }
 
-variable "ssh_whitelist" {
-  type        = "string"
-  description = "Limit SSH access to the designated list of CIDRs"
-  default     = "0.0.0.0/0"
-}
