@@ -115,4 +115,3 @@ variable "vpn_whitelist" {
   description = "Limit VPN access to the designated list of CIDRs"
   default     = "0.0.0.0/0"
 }
-

@@ -83,7 +83,7 @@ EOF
 
 ## Creates IAM instance profile
 resource "aws_iam_instance_profile" "profile" {
-  name  = "${var.stack_item_label}-${var.region}"
+  name = "${var.stack_item_label}-${var.region}"
   role = "${aws_iam_role.role.name}"
 }
 
@@ -199,7 +199,6 @@ resource "aws_eip" "openvpn_eip" {
   }
 }
 
-
 ## Creates instance user data
 data "template_file" "user_data" {
   template = "${file("${path.module}/templates/user_data.tpl")}"
@@ -230,14 +229,15 @@ module "cluster" {
   subnets = ["${split(",",var.subnets)}"]
 
   # LC parameters
-  ami                           = "${coalesce(var.ami_custom, lookup(var.ami_region_lookup, var.region))}"
-  enable_monitoring             = "true"
-  instance_type                 = "${var.instance_type}"
-  instance_profile              = "${aws_iam_instance_profile.profile.id}"
+  ami               = "${coalesce(var.ami_custom, lookup(var.ami_region_lookup, var.region))}"
+  enable_monitoring = "true"
+  instance_type     = "${var.instance_type}"
+  instance_profile  = "${aws_iam_instance_profile.profile.id}"
+
   /*instance_based_naming_enabled = "${var.instance_based_naming_enabled}"*/
-  user_data                     = "${data.template_file.user_data.rendered}"
-  key_name                      = "${var.key_name}"
-  ebs_optimized                 = "false"
+  user_data     = "${data.template_file.user_data.rendered}"
+  key_name      = "${var.key_name}"
+  ebs_optimized = "false"
 
   # ASG parameters
   max_size         = 2
